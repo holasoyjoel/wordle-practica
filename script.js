@@ -13,19 +13,6 @@ const colores = {
     GRIS: 3
 };
 
-const filas = 5;
-const columnas = 4;
-
-const fieldsets = document.querySelectorAll('fieldset');
-
-let oportunidades = 5;
-let filaPosicionada = 0;
-let columnaPosicionada = 0;
-
-let palabraGanadora = elegirPalabraGanadora();
-const arrayPalabraGandora = palabraGanadora.split('');
-let objetoPalabraGanadora;
-var palabras = new Array(13492);
 
 const respuestas = [
     [],
@@ -35,16 +22,56 @@ const respuestas = [
     [],
 ];
 
+const filas = 5;
+const columnas = 4;
+
+let palabraGanadora;
+const fieldsets = document.querySelectorAll('fieldset');
+
+let oportunidades = 5;
+let filaPosicionada = 0;
+let columnaPosicionada = 0;
+let objetoPalabraGanadora;
+let palabras;
+
 // /////////////////////////////////////////////////////////////////////////
 
-const comenzarJuego = () => {
-    cargarPalabras();
-    console.log(palabraGanadora);
-    convertirArrayEnObjeto();
-    seleccionarColumna();
-    eventoLetra();
-};
+const cargarPalabras = async() => {
+    const resp = await fetch('./api.json');
+    const data = await resp.json();
+    return data;
+}
 
+const elegirPalabraGanadora = () => {
+    let numeroAleatorio = Math.floor(Math.random() * palabras.length);
+    let palabraAleatoria = palabras[numeroAleatorio]
+    let tildes = ['á','é','í','ó','ú'];
+    let contieneTilde = true;
+    while(contieneTilde == true ){
+        for(let i= 0; i < 5 ; i++){
+            if(tildes.includes(palabraAleatoria[i])){
+                contieneTilde = true;
+                break;
+            }
+            else{
+                contieneTilde = false;
+            }
+        }
+        if(contieneTilde == false){
+            console.log(`N°:${numeroAleatorio} - Palabra: ${palabraAleatoria} - valorTilde: ${contieneTilde}`);
+        }
+        else{
+            console.log(`N°:${numeroAleatorio} - Palabra: ${palabraAleatoria} - valorTilde: ${contieneTilde}`);
+            console.log('cambiando palabra');
+            numeroAleatorio = Math.floor(Math.random() * palabras.length);
+            palabraAleatoria = palabras[numeroAleatorio]
+        }
+    }
+    palabraGanadora = palabraAleatoria
+    arrayPalabraGandora = palabraGanadora.split('')
+}
+
+///////////////////////////////////
 const eventoLetra =  () => {
     window.addEventListener('keyup' , async(event) => {
         if(event.code !== 'Space'){            
@@ -62,7 +89,6 @@ const eventoLetra =  () => {
                     convertirArrayEnObjeto();
                 }
                 else{
-                    console.log('palabra no existente');
                     document.getElementsByClassName('cartelPalabraNoExiste')[0].style.visibility = 'visible';
                     setTimeout(()=>{
                         document.getElementsByClassName('cartelPalabraNoExiste')[0].style.visibility = 'hidden';
@@ -160,34 +186,75 @@ const convertirArrayEnObjeto = () => {
         }
     })
 }
-const comprobarRespuesta = (filaPosicionada) => {
-    let cuadrosLetras = fieldsets[filaPosicionada].querySelectorAll('input');
+// const comprobarRespuesta = (filaPosicionada) => {
+//     let cuadrosLetras = fieldsets[filaPosicionada].querySelectorAll('input');
 
-    cuadrosLetras.forEach((cuadro , indice) => {
+//     cuadrosLetras.forEach((cuadro , indice) => {
     
-        if(cuadro.value === arrayPalabraGandora[indice]){
-            if(objetoPalabraGanadora[cuadro.value] > 0){
-                valorTableroInicial[filaPosicionada][indice] = colores.VERDE
+//         if(cuadro.value === arrayPalabraGandora[indice]){
+//             if(objetoPalabraGanadora[cuadro.value] > 0){
+//                 valorTableroInicial[filaPosicionada][indice] = colores.VERDE
+//                 objetoPalabraGanadora[cuadro.value] -= 1;
+//             }
+//             else{
+//                 valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
+//                 let indiceLetraAnterior = respuestas[filaPosicionada].indexOf(cuadro.value);
+//                 valorTableroInicial[filaPosicionada][indiceLetraAnterior] = colores.GRIS;
+//             }
+
+//         }
+//         else if(palabraGanadora.includes(cuadro.value)){
+//             if(objetoPalabraGanadora[cuadro.value] > 0){
+//                 valorTableroInicial[filaPosicionada][indice] = colores.AMARILLO
+//                 objetoPalabraGanadora[cuadro.value] -= 1;
+//             }
+//             else{
+//                 valorTableroInicial[filaPosicionada][indice] = colores.GRIS
+//             }
+//         }
+//         else{
+//             valorTableroInicial[filaPosicionada][indice] = colores.GRIS
+//         }
+//     })
+// }
+
+
+const comprobarRespuesta = (filaPosicionada) => {
+    let cuadroLetras = fieldsets[filaPosicionada].querySelectorAll('input');
+    let palabra = palabraGanadora;
+    let arrayAux = [... palabra];
+    cuadroLetras.forEach((cuadro, indice)=> {
+        if(cuadro.value == palabra[indice]){
+            valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
+            let indiceLetra = arrayAux.indexOf(cuadro.value);
+            arrayAux = arrayAux.filter((letra , i) => {
+                if(indiceLetra != i){
+                    return letra
+                }
+            })
+            // console.log('aux asert' , arrayAux);
+        }
+        else if(palabra.includes(cuadro.value)){
+            if(arrayAux.includes(cuadro.value)){
+                valorTableroInicial[filaPosicionada][indice] = colores.AMARILLO;
+                let indiceLetra = arrayAux.indexOf(cuadro.value);
+                arrayAux = arrayAux.filter((letra , i) => {
+                    if(indiceLetra != i){
+                        return letra
+                    }
+                })
+                // console.log('aux include',arrayAux);
             }
             else{
-                valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
-                let indiceLetraAnterior = respuestas[filaPosicionada].indexOf(cuadro.value);
-                valorTableroInicial[filaPosicionada][indiceLetraAnterior] = colores.GRIS;
-            }
-
-        }
-        else if(palabraGanadora.includes(cuadro.value)){
-            if(objetoPalabraGanadora[cuadro.value] > 0){
-                valorTableroInicial[filaPosicionada][indice] = colores.AMARILLO
-                objetoPalabraGanadora[cuadro.value] -= 1;
+                valorTableroInicial[filaPosicionada][indice] = colores.GRIS;
+                
             }
         }
         else{
-            valorTableroInicial[filaPosicionada][indice] = colores.GRIS
+            valorTableroInicial[filaPosicionada][indice] = colores.GRIS;
         }
     })
 }
-
 const verificarExistenciaPalabra = (fila) => {
     const respuestaUsuario =  respuestas[fila].join('');
     return palabras.includes(respuestaUsuario);
@@ -213,42 +280,26 @@ const pintarTablero = (fila) => {
     })
 }
 
-const cargarPalabras = async() =>{
-    const resp = await fetch('./api.json');
-    const data = await resp.json();
-    data.forEach((palabra , indice) => {
-            palabras[indice] = palabra
-    });
-    elegirPalabraGanadora(palabras);
-}
+const comenzarJuego = async() => {
+    // cargar palabras    
+    await cargarPalabras()
+    .then(data => {
+        palabras = data;
+    })
 
-const elegirPalabraGanadora = () => {
-    let numeroAleatorio = Math.floor(Math.random() * palabras.length);
-    let palabraAleatoria = palabras[numeroAleatorio]
-    let tildes = ['á','é','í','ó','ú'];
-    let contieneTilde = true;
-    while(contieneTilde == true ){
-        for(let i= 0; i < 5 ; i++){
-            if(tildes.includes(palabraAleatoria[i])){
-                contieneTilde = true;
-                break;
-            }
-            else{
-                contieneTilde = false;
-            }
-        }
-        if(contieneTilde == false){
-            console.log(`N°:${numeroAleatorio} - Palabra: ${palabraAleatoria} - valorTilde: ${contieneTilde}`);
-        }
-        else{
-            console.log(`N°:${numeroAleatorio} - Palabra: ${palabraAleatoria} - valorTilde: ${contieneTilde}`);
-            console.log('cambiando palabra');
-            numeroAleatorio = Math.floor(Math.random() * palabras.length);
-            palabraAleatoria = palabras[numeroAleatorio]
-        }
-    }
-    return palabraAleatoria;
-}
+    // elegir palabra ganadora
+    elegirPalabraGanadora();
+    
+    // convertirArrayEnObjeto
+    convertirArrayEnObjeto();
+    
+    // seleccionarColumna
+    seleccionarColumna();
+
+    // evento letra
+    eventoLetra();
+};
+
 
 window.onload = () => {
     comenzarJuego();
