@@ -31,10 +31,10 @@ const fieldsets = document.querySelectorAll('fieldset');
 let oportunidades = 5;
 let filaPosicionada = 0;
 let columnaPosicionada = 0;
-let objetoPalabraGanadora;
+let estadoJuego = '';
 let palabras;
 
-// /////////////////////////////////////////////////////////////////////////
+//BLOQUE RELACIONADO RECARGAR PALABRAS Y ELECCION DE PALABRA/////////////////////////////////////////////////////////////////////////
 
 const cargarPalabras = async() => {
     const resp = await fetch('./api.json');
@@ -71,38 +71,45 @@ const elegirPalabraGanadora = () => {
     arrayPalabraGandora = palabraGanadora.split('')
 }
 
-///////////////////////////////////
-const eventoLetra =  () => {
-    window.addEventListener('keyup' , async(event) => {
-        if(event.code !== 'Space'){            
-            if(event.key == 'Enter' && oportunidades > 1 && respuestas[filaPosicionada].length === 5){
-                const existePalabra = await  verificarExistenciaPalabra(filaPosicionada);
-                if(existePalabra){
+//BLOQUE RELACIONADO A ESCRITURA DE LETRA ////////////////////////////////////////////////////////////////////////////
 
+const eventoLetra =  async(event) => {
+        if(event.code !== 'Space'){            
+
+            if(event.key == 'Enter' && oportunidades >= 1 && respuestas[filaPosicionada].length === 5){
+                const existePalabra = await  verificarExistenciaPalabra(filaPosicionada);
+
+                if(existePalabra){
                     comprobarRespuesta(filaPosicionada);
                     pintarTablero(filaPosicionada);
                     fieldsets[filaPosicionada].querySelectorAll('input')[4].style.border = '0px solid white';
-                    oportunidades -= 1;
-                    filaPosicionada += 1;
-                    columnaPosicionada = 0;
-                    seleccionarColumna();
-                    convertirArrayEnObjeto();
+                    if(verificarEstadoJuego(filaPosicionada)){
+                        window.removeEventListener('keyup' , eventoLetra);
+                        estadoJuego = 'ganado'
+                        console.log('Juego ganado');
+
+                        // cartel ganado
+                        console.log( document.getElementsByClassName('cartelEstadoJuego')[0]);
+                        document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = '¡¡Juego Ganado!!';
+                        document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'green';
+                        document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
+                    }
+                    else{
+                        oportunidades -= 1;
+                        filaPosicionada += 1;
+                        columnaPosicionada = 0;
+                        seleccionarColumna();
+                    }
                 }
                 else{
-                    document.getElementsByClassName('cartelPalabraNoExiste')[0].style.visibility = 'visible';
+                    document.getElementsByClassName('cartelPalabraNoExiste')[0].style.opacity = 1;
                     setTimeout(()=>{
-                        document.getElementsByClassName('cartelPalabraNoExiste')[0].style.visibility = 'hidden';
+                        document.getElementsByClassName('cartelPalabraNoExiste')[0].style.opacity = 0;
                     }, 1000)
                 }
             }
-            else if(event.key == 'Enter' && oportunidades == 1 && respuestas[filaPosicionada].length === 5){
-                comprobarRespuesta(filaPosicionada);
-                pintarTablero(filaPosicionada);
-                fieldsets[filaPosicionada].querySelectorAll('input')[4].style.border = '0px solid white';
-                convertirArrayEnObjeto();
-            }
-            else{
-                if(String(event.key).match('[A-Za-z]')){
+            else if(event.key != "Enter" && oportunidades > 0){
+                if((String(event.key).match('[A-Za-z]') || (event.key == 'ñ'))){
                     if(event.key === 'Backspace'){
                         escribirLetra(' ');
                     }
@@ -113,13 +120,24 @@ const eventoLetra =  () => {
                 }
             }
         }
-    })
-}
+        
+        if(oportunidades == 0){
+            console.log('juego perdido');
+            window.removeEventListener('keyup' , eventoLetra);
+
+            // cartel juego finalizado
+            document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = `Juego finalizado, la palabra era: " ${palabraGanadora} "`;
+            document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'black';
+            document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
+
+        }
+} 
+
 
 const seleccionarColumna = () => {
-    if( columnaPosicionada < 5 ){
+    if( columnaPosicionada < 5 && oportunidades > 0){
         // pintar la columna en la que estoy
-        fieldsets[filaPosicionada].querySelectorAll('input')[columnaPosicionada].style.border = '3px solid red';
+        fieldsets[filaPosicionada].querySelectorAll('input')[columnaPosicionada].style.border = '1px solid rgba(0,0,0,0.5)';
         
         // despintar columna anterio y siguiente
         if(columnaPosicionada - 1 >= 0){
@@ -175,50 +193,7 @@ const escribirLetra = (letra) => {
     }
 }
 
-const convertirArrayEnObjeto = () => {
-    objetoPalabraGanadora = {};
-    arrayPalabraGandora.map(letra => {
-        if(letra in objetoPalabraGanadora){
-            objetoPalabraGanadora[letra] += 1;
-        }
-        else{
-            objetoPalabraGanadora[letra] = 1;
-        }
-    })
-}
-// const comprobarRespuesta = (filaPosicionada) => {
-//     let cuadrosLetras = fieldsets[filaPosicionada].querySelectorAll('input');
-
-//     cuadrosLetras.forEach((cuadro , indice) => {
-    
-//         if(cuadro.value === arrayPalabraGandora[indice]){
-//             if(objetoPalabraGanadora[cuadro.value] > 0){
-//                 valorTableroInicial[filaPosicionada][indice] = colores.VERDE
-//                 objetoPalabraGanadora[cuadro.value] -= 1;
-//             }
-//             else{
-//                 valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
-//                 let indiceLetraAnterior = respuestas[filaPosicionada].indexOf(cuadro.value);
-//                 valorTableroInicial[filaPosicionada][indiceLetraAnterior] = colores.GRIS;
-//             }
-
-//         }
-//         else if(palabraGanadora.includes(cuadro.value)){
-//             if(objetoPalabraGanadora[cuadro.value] > 0){
-//                 valorTableroInicial[filaPosicionada][indice] = colores.AMARILLO
-//                 objetoPalabraGanadora[cuadro.value] -= 1;
-//             }
-//             else{
-//                 valorTableroInicial[filaPosicionada][indice] = colores.GRIS
-//             }
-//         }
-//         else{
-//             valorTableroInicial[filaPosicionada][indice] = colores.GRIS
-//         }
-//     })
-// }
-
-
+//BLOQUE RELACIONADO A VERIFICAR RESPUESTA Y PINTAR//////////////////////////////////////////////////////////////////////////////
 const comprobarRespuesta = (filaPosicionada) => {
     let cuadroLetras = fieldsets[filaPosicionada].querySelectorAll('input');
     let palabra = palabraGanadora;
@@ -255,6 +230,7 @@ const comprobarRespuesta = (filaPosicionada) => {
         }
     })
 }
+
 const verificarExistenciaPalabra = (fila) => {
     const respuestaUsuario =  respuestas[fila].join('');
     return palabras.includes(respuestaUsuario);
@@ -280,6 +256,15 @@ const pintarTablero = (fila) => {
     })
 }
 
+const verificarEstadoJuego = (fila) => {
+    const valorCorrecto = (valor) => valor == 1;
+    if(valorTableroInicial[fila].every(valorCorrecto)){
+        return true;
+    };
+}
+////////////////////////////////////////////////////////////////////////////////
+
+
 const comenzarJuego = async() => {
     // cargar palabras    
     await cargarPalabras()
@@ -289,19 +274,17 @@ const comenzarJuego = async() => {
 
     // elegir palabra ganadora
     elegirPalabraGanadora();
-    
-    // convertirArrayEnObjeto
-    convertirArrayEnObjeto();
-    
+        
     // seleccionarColumna
     seleccionarColumna();
 
-    // evento letra
-    eventoLetra();
-};
+}
 
 
 window.onload = () => {
-    comenzarJuego();
+    if(oportunidades > 0){
+        window.addEventListener('keyup' , eventoLetra)
+        comenzarJuego();
+    }
 }
 

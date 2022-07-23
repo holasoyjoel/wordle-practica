@@ -1,20 +1,22 @@
 body{
-    width: 100vw;
+    width: 90vw;
     height: 100vh;
     display: flex;
     justify-content: center;
-    /* align-items: center; */
+    align-items: center;
 }
-
 .container{
+    position: relative;
+}
+form{
     width: 30vw;
 }
-.container fieldset{
+form fieldset{
     display: flex;
     justify-content: space-evenly;
     border: none;
 }
-.container input{
+form input{
     width: 60px;
     height: 60px;
     border: none;
@@ -24,14 +26,15 @@ body{
     font-size: 2rem;
     text-transform: uppercase;
     font-weight: bold;
+    transition: background-color .5s ease-in-out;
 }
 
 .verde{
-    background-color: green;
+    background-color: rgb(90, 142, 90);
     color: white;
 }
 .amarillo{
-    background-color: yellow;
+    background-color: rgb(176, 176, 77);
     color: white;
 }
 .gris{
@@ -39,21 +42,40 @@ body{
     color: white;
 }
 
-.cartelPalabraNoExiste{
+.cartel{
+    border-radius: 10px;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
     width: 200px;
-    height: 50px;
-    background-color: rgb(43, 43, 43);
+    padding: 30px;
+    font-weight: bold;
+    transition: all .3s ease-in-out;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+    opacity: 0;
+    text-align: center;
+    
+}
+
+.cartelPalabraNoExiste{
     color: white;
+    background-color: rgb(43, 43, 43);
+}
+.cartelEstadoJuego{
+    background-color: transparent;
+    height: 100vh;
+    width: 100vw;
+    backdrop-filter: blur(3px);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+}
+.mensajeEstadoJuego{
+    width: 20vw;
+    padding: 50px;
     border-radius: 10px;
-    padding: 10px;
-    font-weight: bold;
-    visibility: hidden;
-    transition: visibility 2s;
+    font-size: 20px;
+    font-weight: 0;
+    letter-spacing: 1px;
 }
