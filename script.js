@@ -90,8 +90,8 @@ const eventoLetra =  async(event) => {
 
                         // cartel ganado
                         console.log( document.getElementsByClassName('cartelEstadoJuego')[0]);
-                        document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = '¡¡Juego Ganado!!';
-                        document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'green';
+                        document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = '¡¡ Juego Ganado !!';
+                        document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'rgb(90, 142, 90)';
                         document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
                     }
                     else{
@@ -109,12 +109,12 @@ const eventoLetra =  async(event) => {
                 }
             }
             else if(event.key != "Enter" && oportunidades > 0){
-                if((String(event.key).match('[A-Za-z]') || (event.key == 'ñ'))){
+                if((String(event.key).match('[A-Za-z]') || (String(event.key).toLocaleLowerCase() == 'ñ'))){
                     if(event.key === 'Backspace'){
                         escribirLetra(' ');
                     }
                     else{
-                        escribirLetra(event.key)
+                        escribirLetra(String(event.key).toLocaleLowerCase())
                     }
                     seleccionarColumna();
                 }
