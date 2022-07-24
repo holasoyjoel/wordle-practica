@@ -31,7 +31,7 @@ const fieldsets = document.querySelectorAll('fieldset');
 let oportunidades = 5;
 let filaPosicionada = 0;
 let columnaPosicionada = 0;
-let estadoJuego = '';
+let estadoJuego = ' ';
 let palabras;
 
 //BLOQUE RELACIONADO RECARGAR PALABRAS Y ELECCION DE PALABRA/////////////////////////////////////////////////////////////////////////
@@ -74,63 +74,71 @@ const elegirPalabraGanadora = () => {
 //BLOQUE RELACIONADO A ESCRITURA DE LETRA ////////////////////////////////////////////////////////////////////////////
 
 const eventoLetra =  async(event) => {
-        if(event.code !== 'Space'){            
+    console.log((String(event.key).match(['A-Za-z']) != null));
+    if(event.code !== 'Space'){            
+        
+        if(event.key == 'Enter' && oportunidades >= 1 && respuestas[filaPosicionada].length === 5){
+            const existePalabra = await  verificarExistenciaPalabra(filaPosicionada);
 
-            if(event.key == 'Enter' && oportunidades >= 1 && respuestas[filaPosicionada].length === 5){
-                const existePalabra = await  verificarExistenciaPalabra(filaPosicionada);
+            if(existePalabra){
+                comprobarRespuesta(filaPosicionada);
+                pintarTablero(filaPosicionada);
+                fieldsets[filaPosicionada].querySelectorAll('input')[4].style.border = '0px solid white';
+                if(verificarEstadoJuego(filaPosicionada)){
+                    window.removeEventListener('keyup' , eventoLetra);
+                    estadoJuego = 'ganado'
+                    console.log('Juego ganado');
 
-                if(existePalabra){
-                    comprobarRespuesta(filaPosicionada);
-                    pintarTablero(filaPosicionada);
-                    fieldsets[filaPosicionada].querySelectorAll('input')[4].style.border = '0px solid white';
-                    if(verificarEstadoJuego(filaPosicionada)){
-                        window.removeEventListener('keyup' , eventoLetra);
-                        estadoJuego = 'ganado'
-                        console.log('Juego ganado');
-
-                        // cartel ganado
-                        console.log( document.getElementsByClassName('cartelEstadoJuego')[0]);
-                        document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = '¡¡ Juego Ganado !!';
-                        document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'rgb(90, 142, 90)';
-                        document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
-                    }
-                    else{
-                        oportunidades -= 1;
-                        filaPosicionada += 1;
-                        columnaPosicionada = 0;
-                        seleccionarColumna();
-                    }
+                    // cartel ganado
+                    console.log( document.getElementsByClassName('cartelEstadoJuego')[0]);
+                    document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = '¡¡ Juego Ganado !!';
+                    document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'rgb(90, 142, 90)';
+                    document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
                 }
                 else{
-                    document.getElementsByClassName('cartelPalabraNoExiste')[0].style.opacity = 1;
-                    setTimeout(()=>{
-                        document.getElementsByClassName('cartelPalabraNoExiste')[0].style.opacity = 0;
-                    }, 1000)
-                }
-            }
-            else if(event.key != "Enter" && oportunidades > 0){
-                if((String(event.key).match('[A-Za-z]') || (String(event.key).toLocaleLowerCase() == 'ñ'))){
-                    if(event.key === 'Backspace'){
-                        escribirLetra(' ');
-                    }
-                    else{
-                        escribirLetra(String(event.key).toLocaleLowerCase())
-                    }
+                    oportunidades -= 1;
+                    filaPosicionada += 1;
+                    columnaPosicionada = 0;
                     seleccionarColumna();
                 }
             }
+            else{
+                document.getElementsByClassName('cartelPalabraNoExiste')[0].style.opacity = 1;
+                setTimeout(()=>{
+                    document.getElementsByClassName('cartelPalabraNoExiste')[0].style.opacity = 0;
+                }, 1000)
+            }
         }
-        
-        if(oportunidades == 0){
-            console.log('juego perdido');
-            window.removeEventListener('keyup' , eventoLetra);
-
-            // cartel juego finalizado
-            document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = `Juego finalizado, la palabra era: " ${palabraGanadora} "`;
-            document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'black';
-            document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
-
+        else if(event.key != "Enter" && oportunidades > 0){
+            if(((String(event.key).match('[A-Za-z]')) || (String(event.key).toLocaleLowerCase() == 'ñ'))){
+                console.log('entro');
+                if(estadoJuego == ' '){
+                    estadoJuego = 'comenzo';
+                    comenzarReloj();
+                }
+                if(event.key === 'Backspace'){
+                    escribirLetra(' ');
+                }
+                else{
+                    escribirLetra(String(event.key).toLocaleLowerCase())
+                }
+                seleccionarColumna();
+            }
         }
+    }
+    
+    if(oportunidades == 0){
+        console.log('juego perdido');
+        window.removeEventListener('keyup' , eventoLetra);
+
+        // cartel juego finalizado
+        document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = `Juego finalizado, la palabra era: " ${palabraGanadora} "`;
+        document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'black';
+        document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
+
+        estadoJuego = 'finalizado';
+
+    }
 } 
 
 
@@ -262,8 +270,36 @@ const verificarEstadoJuego = (fila) => {
         return true;
     };
 }
-////////////////////////////////////////////////////////////////////////////////
 
+//BLOQUE RELACIONADO CON EL RELOJ//////////////////////////////////////////////////////////////////////////////
+const comenzarReloj = () => {
+    let reloj = document.getElementsByClassName('reloj')[0];
+    let segundos = minutos = horas = 0;
+    let arrancarReloj = setInterval(()=>{
+        segundos++;
+        if(segundos == 60){
+            minutos++;
+            segundos=0
+        }
+        if(minutos == 60){
+            minutos=0
+            horas++
+        }
+        reloj.innerHTML = `${(horas < 10)? '0' + horas : horas} : ${(minutos < 10)? '0' + minutos : minutos} : ${(segundos < 10)? '0' + segundos : segundos}`
+
+        
+            
+        if(estadoJuego == 'ganado' || estadoJuego == 'finalizado'){
+            console.log('eliminando interval');
+            clearInterval(arrancarReloj);
+        }
+
+        
+    }, 1000)
+
+    
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const comenzarJuego = async() => {
     // cargar palabras    
