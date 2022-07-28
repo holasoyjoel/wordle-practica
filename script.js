@@ -74,7 +74,6 @@ const elegirPalabraGanadora = () => {
 //BLOQUE RELACIONADO A ESCRITURA DE LETRA ////////////////////////////////////////////////////////////////////////////
 
 const eventoLetra =  async(event) => {
-    console.log((String(event.key).match(['A-Za-z']) != null));
     if(event.code !== 'Space'){            
         
         if(event.key == 'Enter' && oportunidades >= 1 && respuestas[filaPosicionada].length === 5){
@@ -111,7 +110,6 @@ const eventoLetra =  async(event) => {
         }
         else if(event.key != "Enter" && oportunidades > 0){
             if(((String(event.key).match('[A-Za-z]')) || (String(event.key).toLocaleLowerCase() == 'ñ'))){
-                console.log('entro');
                 if(estadoJuego == ' '){
                     estadoJuego = 'comenzo';
                     comenzarReloj();
@@ -206,37 +204,23 @@ const comprobarRespuesta = (filaPosicionada) => {
     let cuadroLetras = fieldsets[filaPosicionada].querySelectorAll('input');
     let palabra = palabraGanadora;
     let arrayAux = [... palabra];
+
     cuadroLetras.forEach((cuadro, indice)=> {
         if(cuadro.value == palabra[indice]){
-            valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
-            let indiceLetra = arrayAux.indexOf(cuadro.value);
-            arrayAux = arrayAux.filter((letra , i) => {
-                if(indiceLetra != i){
-                    return letra
-                }
-            })
-            // console.log('aux asert' , arrayAux);
-        }
-        else if(palabra.includes(cuadro.value)){
             if(arrayAux.includes(cuadro.value)){
-                valorTableroInicial[filaPosicionada][indice] = colores.AMARILLO;
+                console.log('entro');
+                valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
                 let indiceLetra = arrayAux.indexOf(cuadro.value);
                 arrayAux = arrayAux.filter((letra , i) => {
                     if(indiceLetra != i){
                         return letra
                     }
                 })
-                // console.log('aux include',arrayAux);
             }
-            else{
-                valorTableroInicial[filaPosicionada][indice] = colores.GRIS;
-                
-            }
-        }
-        else{
-            valorTableroInicial[filaPosicionada][indice] = colores.GRIS;
         }
     })
+    console.log(arrayAux);
+        
 }
 
 const verificarExistenciaPalabra = (fila) => {
