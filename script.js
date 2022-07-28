@@ -203,24 +203,39 @@ const escribirLetra = (letra) => {
 const comprobarRespuesta = (filaPosicionada) => {
     let cuadroLetras = fieldsets[filaPosicionada].querySelectorAll('input');
     let palabra = palabraGanadora;
-    let arrayAux = [... palabra];
+    // let palabra = 'alaga';
+    let palabraAux = [...palabra]
+    let respAux = [];
+    cuadroLetras.forEach((cuadro , indice) =>{
+        console.log(`${cuadro.value} - ${palabraAux[indice]}`);
+        if(cuadro.value == palabraAux[indice]){
+            valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
+            palabraAux[indice] = ''
+            respAux.push('')
+        }
+        else{
+            respAux.push(cuadro.value);
+        }
+    })
+    // palabraAux = palabraAux.filter(value => value != "")
+    console.log('respuAux:',respAux);
+    console.log('palabraAux',palabraAux);
+    respAux.map((valor , indice) => {
+        if(valor != ''){
 
-    cuadroLetras.forEach((cuadro, indice)=> {
-        if(cuadro.value == palabra[indice]){
-            if(arrayAux.includes(cuadro.value)){
-                console.log('entro');
-                valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
-                let indiceLetra = arrayAux.indexOf(cuadro.value);
-                arrayAux = arrayAux.filter((letra , i) => {
-                    if(indiceLetra != i){
-                        return letra
-                    }
-                })
+            if(palabraAux.includes(valor)){
+                valorTableroInicial[filaPosicionada][indice] = colores.AMARILLO;
+                respAux[indice] = '';
+                let indiceLetraBorrar = palabraAux.indexOf(valor);
+                palabraAux[indiceLetraBorrar] = ""
+            }
+            else{
+                valorTableroInicial[filaPosicionada][indice] = colores.GRIS;
+
             }
         }
     })
-    console.log(arrayAux);
-        
+
 }
 
 const verificarExistenciaPalabra = (fila) => {
