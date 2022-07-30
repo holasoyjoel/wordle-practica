@@ -78,30 +78,15 @@
 
     <script>
         window.onload = () => {
-            let partidasLocalStorage = [
-                {
-                    'nombre': 'joel',
-                    'partidas': [
-                                    {
-                                        'palabraGanadora': 'Perro',
-                                        'tablero': 'tablero',
-                                        'tiempo': 'tiempo',
-                                        'oportunidades': 'oportunidades',
-                                        'estado': 'no finalizado'
-                                    },
+    
+            // aca se guardarán las partidas del localstorage
+            let partidasLocalStorage = [];
 
-                                ]
-                }
-            ]
-            localStorage.setItem('partidasLocalStorage' , JSON.stringify(partidasLocalStorage));
-
-            let partidas = [];
-
+            // viendo si existen partidas
             if(localStorage.getItem('partidasLocalStorage')){
-                partidas = JSON.parse(localStorage.getItem('partidasLocalStorage'));
+                partidasLocalStorage = JSON.parse(localStorage.getItem('partidasLocalStorage'));
             }
 
-            console.log(partidas);
             let bottonJugar = document.getElementsByClassName('button')[0]; 
             let inputEntrada = document.getElementsByTagName('input')[0];
 
@@ -115,15 +100,37 @@
             inputEntrada.addEventListener('keyup' , (event) => {
                 if(event.key === 'Enter'){
                     if(inputEntrada.value.trim() !== ""){
-                        let persona = {
-                            'nombre' : inputEntrada.value,
-                            'partidas' : []
+                        if(partidasLocalStorage){
+                            if(existeJugadorConPartida(inputEntrada.value)){
+                                // existen partidas y existe jugador con partidas
+                                console.log('existe jugador con partida');
+                            }
+                            else{
+                                console.log('no existe jugador');                                
+                                let persona = {
+                                    'nombre' : inputEntrada.value,
+                                    'partidas' : []
+                                }
+                                console.log('agregando nueva persona' , persona);
+                                partidasLocalStorage.push(persona);
+                                console.log(partidasLocalStorage);
+                            }
                         }
-                        partidas.push(persona);
-                        console.log(partidas);
+                        
                     }
                 }
             })
+
+            const existeJugadorConPartida = (nombreJugador) => {
+                let existeJugador = false;
+                partidasLocalStorage.map((jugador , indice) => {
+                    if(jugador.nombre == nombreJugador){
+                        existeJugador = true;
+                        return;
+                    }
+                })
+                return existeJugador;
+            }
         }
 
 
