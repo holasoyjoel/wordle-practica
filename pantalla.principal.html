@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+        .container{
+            /* border:1px solid red; */
+            width: 50vw;
+            height: 50vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .button{
+            background-color: rgb(178, 178, 178);
+            color:rgb(90, 90, 90) ;
+            font-size: 4rem;
+            padding: 5% 15%;
+            text-transform:uppercase;
+            border-radius: 10px;
+            transition: all .2s ease-in-out;
+        }
+        .button:hover{
+            background-color: rgb(255, 153, 132);
+            color:white;
+            cursor: pointer;
+        }
+        .button:active{
+            background-color: rgb(213, 122, 104);
+            transform: scale(1.1);
+        }
+        .hidden{
+            display: none;
+        }
+        .inputUsuario{
+            /* background-color: red; */
+            width: 80%;
+            
+        }
+        .inputUsuario span{
+            margin-bottom: 10px;
+            text-align: center;
+            /* background-color: blue; */
+            width: 100%;
+            display: block;
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .inputUsuario input{
+            width: 100%;
+            padding: 10px 0;
+            font-size: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="button">
+            Jugar
+        </div>
+        <div class="inputUsuario hidden">
+            <span>INGRESE SU NOMBRE</span>
+            <input type="text" maxlength="15">
+        </div>
+    </div>
+
+    <script>
+        window.onload = () => {
+            let partidasLocalStorage = [
+                {
+                    'nombre': 'joel',
+                    'partidas': [
+                                    {
+                                        'palabraGanadora': 'Perro',
+                                        'tablero': 'tablero',
+                                        'tiempo': 'tiempo',
+                                        'oportunidades': 'oportunidades',
+                                        'estado': 'no finalizado'
+                                    },
+
+                                ]
+                }
+            ]
+            localStorage.setItem('partidasLocalStorage' , JSON.stringify(partidasLocalStorage));
+
+            let partidas = [];
+
+            if(localStorage.getItem('partidasLocalStorage')){
+                partidas = JSON.parse(localStorage.getItem('partidasLocalStorage'));
+            }
+
+            console.log(partidas);
+            let bottonJugar = document.getElementsByClassName('button')[0]; 
+            let inputEntrada = document.getElementsByTagName('input')[0];
+
+
+            bottonJugar.addEventListener('click' , ()=>{
+                let inputUsuario = document.getElementsByClassName('inputUsuario')[0];
+                inputUsuario.classList.toggle('hidden');
+                bottonJugar.classList = "button hidden"
+            })
+
+            inputEntrada.addEventListener('keyup' , (event) => {
+                if(event.key === 'Enter'){
+                    if(inputEntrada.value.trim() !== ""){
+                        let persona = {
+                            'nombre' : inputEntrada.value,
+                            'partidas' : []
+                        }
+                        partidas.push(persona);
+                        console.log(partidas);
+                    }
+                }
+            })
+        }
+
+
+    </script>
+</body>
+</html>
