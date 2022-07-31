@@ -1,4 +1,4 @@
-const valorTableroInicial = [
+let valorTableroInicial = [
     [0,0,0,0,0],
     [0,0,0,0,0],
     [0,0,0,0,0],
@@ -6,7 +6,7 @@ const valorTableroInicial = [
     [0,0,0,0,0],
 ];
 
-const colores = {
+let colores = {
     BLANCO: 0,
     VERDE: 1,
     AMARILLO: 2,
@@ -14,7 +14,7 @@ const colores = {
 };
 
 
-const respuestas = [
+let respuestas = [
     [],
     [],
     [],
@@ -58,11 +58,8 @@ const elegirPalabraGanadora = () => {
             }
         }
         if(contieneTilde == false){
-            console.log(`N°:${numeroAleatorio} - Palabra: ${palabraAleatoria} - valorTilde: ${contieneTilde}`);
         }
         else{
-            console.log(`N°:${numeroAleatorio} - Palabra: ${palabraAleatoria} - valorTilde: ${contieneTilde}`);
-            console.log('cambiando palabra');
             numeroAleatorio = Math.floor(Math.random() * palabras.length);
             palabraAleatoria = palabras[numeroAleatorio]
         }
@@ -86,10 +83,8 @@ const eventoLetra =  async(event) => {
                 if(verificarEstadoJuego(filaPosicionada)){
                     window.removeEventListener('keyup' , eventoLetra);
                     estadoJuego = 'ganado'
-                    console.log('Juego ganado');
 
                     // cartel ganado
-                    console.log( document.getElementsByClassName('cartelEstadoJuego')[0]);
                     document.getElementsByClassName('mensajeEstadoJuego')[0].innerHTML = '¡¡ Juego Ganado !!';
                     document.getElementsByClassName('mensajeEstadoJuego')[0].style.color = 'rgb(90, 142, 90)';
                     document.getElementsByClassName('cartelEstadoJuego')[0].style.opacity = 1;
@@ -111,7 +106,7 @@ const eventoLetra =  async(event) => {
         else if(event.key != "Enter" && oportunidades > 0){
             if(((String(event.key).match('[A-Za-z]')) || (String(event.key).toLocaleLowerCase() == 'ñ'))){
                 if(estadoJuego == ' '){
-                    estadoJuego = 'comenzo';
+                    estadoJuego = 'encurso';
                     comenzarReloj();
                 }
                 if(event.key === 'Backspace'){
@@ -126,7 +121,6 @@ const eventoLetra =  async(event) => {
     }
     
     if(oportunidades == 0){
-        console.log('juego perdido');
         window.removeEventListener('keyup' , eventoLetra);
 
         // cartel juego finalizado
@@ -207,7 +201,6 @@ const comprobarRespuesta = (filaPosicionada) => {
     let palabraAux = [...palabra]
     let respAux = [];
     cuadroLetras.forEach((cuadro , indice) =>{
-        console.log(`${cuadro.value} - ${palabraAux[indice]}`);
         if(cuadro.value == palabraAux[indice]){
             valorTableroInicial[filaPosicionada][indice] = colores.VERDE;
             palabraAux[indice] = ''
@@ -218,8 +211,6 @@ const comprobarRespuesta = (filaPosicionada) => {
         }
     })
     // palabraAux = palabraAux.filter(value => value != "")
-    console.log('respuAux:',respAux);
-    console.log('palabraAux',palabraAux);
     respAux.map((valor , indice) => {
         if(valor != ''){
 
@@ -273,7 +264,10 @@ const verificarEstadoJuego = (fila) => {
 //BLOQUE RELACIONADO CON EL RELOJ//////////////////////////////////////////////////////////////////////////////
 const comenzarReloj = () => {
     let reloj = document.getElementsByClassName('reloj')[0];
-    let segundos = minutos = horas = 0;
+    // let segundos = minutos = horas = 0;
+    let horas = parseInt(reloj.innerHTML.split(':')[0].toString().trim());
+    let minutos = parseInt(reloj.innerHTML.split(':')[1].toString().trim());
+    let segundos = parseInt(reloj.innerHTML.split(':')[2].toString().trim());
     let arrancarReloj = setInterval(()=>{
         segundos++;
         if(segundos == 60){
@@ -289,7 +283,6 @@ const comenzarReloj = () => {
         
             
         if(estadoJuego == 'ganado' || estadoJuego == 'finalizado'){
-            console.log('eliminando interval');
             clearInterval(arrancarReloj);
         }
 
@@ -298,18 +291,123 @@ const comenzarReloj = () => {
 
     
 }
+//////////////////////////////////////////////////////////////////////////////////////////
+const existePartida = (palabra , partidaActual) =>{
+    let partidasLocalStorage = JSON.parse(localStorage.getItem('partidasLocalStorage'))
+    let jugador = JSON.parse(localStorage.getItem('partidaActual'));
+    let partidasJugador = [];
+    let existeEstaPartida = false;
+    let indiceJugador;
+    let indicePartida;
+    partidasLocalStorage.map((partida, indice) => {
+        if(jugador.nombre == partida.nombre){
+            partidasJugador = partida.partidas;
+            indiceJugador = indice;
+        }
+    })
+
+    partidasJugador.map((partida , indice) => {
+        if(partida.palabraGanadora == partida.palabraGanadora){
+            existeEstaPartida = true;
+            indicePartida = indice;
+        }
+    });
+
+    // agrego nuevo partida
+    if(existeEstaPartida == false){
+        partidasLocalStorage[indiceJugador].partidas.push(partidaActual)
+    }
+    else{
+        partidasLocalStorage[indiceJugador].partidas[indicePartida] = partidaActual;
+        
+    }
+    localStorage.setItem('partidasLocalStorage' , JSON.stringify(partidasLocalStorage));
+
+}
+
+const traerPartidaEnCurso = (palabraGanadora) => {
+    const partidasLocalStorage = JSON.parse(localStorage.getItem('partidasLocalStorage'));
+    const partidaActual = JSON.parse(localStorage.getItem('partidaActual'));
+
+    let partidaEnCurso;
+    partidasLocalStorage.map((jugador , ijugador)=>{
+        if(jugador.nombre == partidaActual.nombre){
+            indiceJugador = ijugador;
+            jugador.partidas.map((partida)=>{
+                if(partida.palabraGanadora == palabraGanadora){
+                    partidaEnCurso = partida;
+                }
+            })
+        }
+    })
+    return partidaEnCurso;
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const comenzarJuego = async() => {
+    let partidaActual = JSON.parse(localStorage.getItem('partidaActual'));
+    document.getElementById('guardar').addEventListener('click' , ()=>{
+        let reloj = document.getElementsByClassName('reloj')[0].innerHTML;
+        let horas = reloj.split(':')[0].trim();
+        let minutos = reloj.split(':')[1].trim();
+        let segundos = reloj.split(':')[2].trim();
+        
+        let tiempo = {
+            'horas': horas,
+            'minutos': minutos,
+            'segundos': segundos
+        }
+
+        let partida = {
+            palabraGanadora,
+            tiempo,
+            oportunidades,
+            estadoJuego,
+            'progreso': {
+                'tablero': valorTableroInicial,
+                respuestas
+            }
+        }
+        existePartida(palabraGanadora, partida)
+    })
+
     // cargar palabras    
     await cargarPalabras()
     .then(data => {
         palabras = data;
     })
 
-    // elegir palabra ganadora
-    elegirPalabraGanadora();
-        
+    // elegir palabra ganadora si es una partida nueva / palabraGanadora es la que elegio el jugador
+    if(partidaActual.palabra == ""){
+        elegirPalabraGanadora();
+        partidaActual.palabra = palabraGanadora;
+        localStorage.setItem('partidaActual',JSON.stringify({
+            'nombre': partidaActual.nombre,
+            'palabra': palabraGanadora
+        }))
+    }
+    else{
+        palabraGanadora = partidaActual.palabra;
+        let partida = traerPartidaEnCurso(palabraGanadora) 
+        // seteando con los datos obtenidos
+        oportunidades = partida.oportunidades;
+        respuestas = [...partida.progreso.respuestas];
+        valorTableroInicial = partida.progreso.tablero;
+        document.getElementsByClassName('reloj')[0].innerHTML = `${partida.tiempo.horas} : ${partida.tiempo.minutos} : ${partida.tiempo.segundos}`;
+        filaPosicionada = 5 - oportunidades;
+
+        let fieldsets = document.getElementsByTagName('fieldset');
+        respuestas.map((fila , indice)=>{
+            if(fila.length > 0){
+                for(let c= 0; c<5 ; c++){
+                    fieldsets[indice].querySelectorAll('input')[c].value = fila[c];
+                }
+            }
+        comprobarRespuesta(indice)
+        pintarTablero(indice)
+        })
+
+    }        
     // seleccionarColumna
     seleccionarColumna();
 

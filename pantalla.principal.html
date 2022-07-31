@@ -87,6 +87,7 @@
                 partidasLocalStorage = JSON.parse(localStorage.getItem('partidasLocalStorage'));
             }
 
+            console.log(partidasLocalStorage);
             let bottonJugar = document.getElementsByClassName('button')[0]; 
             let inputEntrada = document.getElementsByTagName('input')[0];
 
@@ -100,23 +101,29 @@
             inputEntrada.addEventListener('keyup' , (event) => {
                 if(event.key === 'Enter'){
                     if(inputEntrada.value.trim() !== ""){
-                        if(partidasLocalStorage){
-                            if(existeJugadorConPartida(inputEntrada.value)){
-                                // existen partidas y existe jugador con partidas
-                                console.log('existe jugador con partida');
-                            }
-                            else{
-                                console.log('no existe jugador');                                
-                                let persona = {
-                                    'nombre' : inputEntrada.value,
-                                    'partidas' : []
-                                }
-                                console.log('agregando nueva persona' , persona);
-                                partidasLocalStorage.push(persona);
-                                console.log(partidasLocalStorage);
-                            }
+                        if(existeJugadorConPartida(inputEntrada.value.toLowerCase())){
+                            // existen partidas y existe jugador con partidas
+                            console.log('existe jugador con partida');
                         }
-                        
+                        else{
+                            let persona = {
+                                'nombre' : inputEntrada.value.toLowerCase(),
+                                'partidas' : []
+                            }
+                            console.log('agregando persona');
+                            partidasLocalStorage.push(persona);
+                            localStorage.setItem('partidasLocalStorage' , JSON.stringify(partidasLocalStorage));
+                            
+                            localStorage.setItem('partidaActual' , JSON.stringify({
+                                'nombre': inputEntrada.value.toLowerCase(),
+                                'palabra': ''
+                            }))
+                            
+                            inputEntrada.value = '';
+
+                            console.log(`partida actual: ${localStorage.getItem('partidaActual')}`);
+                            location.replace('index.html');
+                        }
                     }
                 }
             })

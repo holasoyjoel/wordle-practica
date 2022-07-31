@@ -86,3 +86,21 @@ form input{
     font-weight: 0;
     letter-spacing: 1px;
 }
+
+#guardar{
+    margin-top: 30px;
+    margin-bottom: 5px;
+    background-color: rgb(175, 175, 175);
+    border: none;
+    padding: 10px;
+    cursor:pointer;
+}
+#guardar:hover{
+    background-color: rgb(157, 157, 157);
+}
+#guardar:active{
+    transform: scale(1.1);
+}
+.hidden{
+    display: none;
+}
